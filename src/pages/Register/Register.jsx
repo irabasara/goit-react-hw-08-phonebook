@@ -1,51 +1,40 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { getContacts } from 'redux/contacts/selector';
-import { addContacts } from 'redux/contacts/contactsOperations';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import Box from '@mui/material/Box';
+import { Box } from '@mui/material';
+import { useDispatch } from 'react-redux';
+import { register } from 'redux/auth/authOperations';
 
 const validationSchema = yup.object({
   name: yup.string('Enter your name').required('Name is required'),
-  number: yup
-    .string('Enter number')
-    .required('Enter number')
-    .trim()
-    .matches(
-      /\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}/,
-      'Phone number must be digits and can contain spaces, dashes, parentheses and can start with +'
-    ),
+  email: yup
+    .string('Enter your email')
+    .email('Enter a valid email')
+    .required('Email is required'),
+  password: yup
+    .string('Enter your password')
+    .min(8, 'Password should be of minimum 8 characters length')
+    .required('Password is required'),
 });
 
-export const ContactForm = () => {
+export const Register = () => {
   const dispatch = useDispatch();
-  const contacts = useSelector(getContacts);
   const formik = useFormik({
     initialValues: {
       name: '',
-      number: '',
+      email: '',
+      password: '',
     },
     validationSchema: validationSchema,
     onSubmit: (values, { resetForm }) => {
-      if (
-        contacts.some(
-          contact => contact.name.toLowerCase() === values.name.toLowerCase()
-        )
-      ) {
-        alert(`${values.name} is already in contacts`);
-        resetForm();
-
-        return;
-      }
       dispatch(
-        addContacts({
+        register({
           name: values.name.toLowerCase(),
-          number: values.number,
+          email: values.email.toLowerCase(),
+          password: values.password,
         })
       );
-
       resetForm();
     },
   });
@@ -74,15 +63,26 @@ export const ContactForm = () => {
             sx={{ width: '350px' }}
           />
           <TextField
-            id="number"
-            name="number"
-            label="Number"
-            type="tel"
-            value={formik.values.number}
+            id="email"
+            name="email"
+            label="Email"
+            value={formik.values.email}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            error={formik.touched.number && Boolean(formik.errors.number)}
-            helperText={formik.touched.number && formik.errors.number}
+            error={formik.touched.email && Boolean(formik.errors.email)}
+            helperText={formik.touched.email && formik.errors.email}
+            sx={{ width: '350px' }}
+          />
+          <TextField
+            id="password"
+            name="password"
+            label="Password"
+            type="password"
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.password && Boolean(formik.errors.password)}
+            helperText={formik.touched.password && formik.errors.password}
             sx={{ width: '350px' }}
           />
           <Button
@@ -91,7 +91,7 @@ export const ContactForm = () => {
             type="submit"
             sx={{ width: '250px' }}
           >
-            Add contact
+            Sign up
           </Button>
         </Box>
       </form>
